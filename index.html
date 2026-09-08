@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MyAI - AI Assistant</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            background: #212121;
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ================= SIDEBAR ================= */
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100vh;
+            background: #171717;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 22px;
+            font-weight: bold;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .new-chat {
+            border: 1px solid #444;
+            background: #212121;
+            color: white;
+            border-radius: 8px;
+            padding: 12px;
+            cursor: pointer;
+            font-size: 15px;
+            text-align: left;
+            transition: 0.2s;
+        }
+
+        .new-chat:hover {
+            background: #2d2d2d;
+        }
+
+        .chat-history {
+            margin-top: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .history-title {
+            color: #999;
+            font-size: 12px;
+            padding: 10px;
+            text-transform: uppercase;
+        }
+
+        .chat-item {
+            padding: 10px;
+            border-radius: 7px;
+            cursor: pointer;
+            color: #ddd;
+            font-size: 14px;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chat-item:hover {
+            background: #2a2a2a;
+        }
+
+        .sidebar-bottom {
+            border-top: 1px solid #333;
+            padding-top: 15px;
+        }
+
+        .user-box {
+            padding: 10px;
+            color: #ddd;
+            font-size: 14px;
+        }
+
+        /* ================= MAIN ================= */
+
+        .main {
+            margin-left: 260px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* ================= HEADER ================= */
+
+        .header {
+            height: 60px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 25px;
+            background: #212121;
+        }
+
+        .model-name {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .status {
+            font-size: 13px;
+            color: #7ee787;
+        }
+
+        /* ================= CHAT AREA ================= */
+
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px 20px 150px;
+        }
+
+        .welcome {
+            max-width: 800px;
+            margin: 80px auto 0;
+            text-align: center;
+        }
+
+        .welcome h1 {
+            font-size: 38px;
+            margin-bottom: 15px;
+        }
+
+        .welcome p {
+            color: #aaa;
+            font-size: 16px;
+        }
+
+        /* ================= MESSAGES ================= */
+
+        .message {
+            max-width: 850px;
+            margin: 0 auto 25px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #444;
+            flex-shrink: 0;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .user-avatar {
+            background: #6b46c1;
+        }
+
+        .ai-avatar {
+            background: #10a37f;
+        }
+
+        .message-content {
+            line-height: 1.6;
+            font-size: 15px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        /* ================= INPUT ================= */
+
+        .input-area {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(
+                transparent,
+                #212121 30%
+            );
+        }
+
+        .input-box {
+            max-width: 850px;
+            margin: auto;
+            background: #2f2f2f;
+            border: 1px solid #555;
+            border-radius: 15px;
+            display: flex;
+            align-items: flex-end;
+            padding: 10px;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.25);
+        }
+
+        textarea {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: white;
+            resize: none;
+            min-height: 25px;
+            max-height: 150px;
+            padding: 7px;
+            font-size: 15px;
+        }
+
+        textarea::placeholder {
+            color: #999;
+        }
+
+        .send-button {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            border: none;
+            background: white;
+            color: black;
+            cursor: pointer;
+            font-size: 18px;
+            transition: 0.2s;
+        }
+
+        .send-button:hover {
+            transform: scale(1.05);
+        }
+
+        .send-button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .disclaimer {
+            max-width: 850px;
+            margin: 8px auto 0;
+            text-align: center;
+            color: #777;
+            font-size: 11px;
+        }
+
+        /* ================= MOBILE ================= */
+
+        .menu-button {
+            display: none;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        @media (max-width: 700px) {
+
+            .sidebar {
+                transform: translateX(-100%);
+                transition: 0.3s;
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main {
+                margin-left: 0;
+            }
+
+            .menu-button {
+                display: block;
+            }
+
+            .header {
+                padding: 0 15px;
+            }
+
+            .welcome h1 {
+                font-size: 28px;
+            }
+
+            .chat-container {
+                padding-left: 12px;
+                padding-right: 12px;
+            }
+
+            .input-area {
+                padding: 10px;
+            }
+        }
+
+        /* ================= SCROLLBAR ================= */
+
+        ::-webkit-scrollbar {
+            width: 7px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #555;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ================= SIDEBAR ================= -->
+
+    <aside class="sidebar" id="sidebar">
+
+        <div class="logo">
+            🤖 MyAI
+        </div>
+
+        <button class="new-chat" onclick="newChat()">
+            ＋ New chat
+        </button>
+
+        <div class="chat-history">
+
+            <div class="history-title">
+                Recent
+            </div>
+
+            <div id="historyList">
+                <!-- Chat history will appear here -->
+            </div>
+
+        </div>
+
+        <div class="sidebar-bottom">
+
+            <div class="user-box">
+                👤 Guest User
+            </div>
+
+        </div>
+
+    </aside>
+
+
+    <!-- ================= MAIN ================= -->
+
+    <main class="main">
+
+        <!-- HEADER -->
+
+        <header class="header">
+
+            <button
+                class="menu-button"
+                onclick="toggleSidebar()">
+                ☰
+            </button>
+
+            <div class="model-name">
+                MyAI
+            </div>
+
+            <div class="status">
+                ● Online
+            </div>
+
+        </header>
+
+
+        <!-- ================= CHAT ================= -->
+
+        <section
+            class="chat-container"
+            id="chatContainer">
+
+            <div class="welcome" id="welcome">
+
+                <h1>
+                    How can I help you?
+                </h1>
+
+                <p>
+                    Ask me anything and let's build something awesome.
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================= INPUT ================= -->
+
+        <div class="input-area">
+
+            <div class="input-box">
+
+                <textarea
+                    id="messageInput"
+                    placeholder="Message MyAI..."
+                    rows="1"
+                    oninput="autoResize(this)"
+                    onkeydown="handleKey(event)">
+                </textarea>
+
+                <button
+                    class="send-button"
+                    id="sendButton"
+                    onclick="sendMessage()">
+                    ↑
+                </button>
+
+            </div>
+
+            <div class="disclaimer">
+                MyAI can make mistakes. Check important information.
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <!-- ================= JAVASCRIPT ================= -->
+
+    <script>
+
+        const input = document.getElementById("messageInput");
+        const chatContainer = document.getElementById("chatContainer");
+        const welcome = document.getElementById("welcome");
+        const sendButton = document.getElementById("sendButton");
+        const historyList = document.getElementById("historyList");
+
+
+        /* ================= SEND MESSAGE ================= */
+
+        function sendMessage() {
+
+            const message = input.value.trim();
+
+            if (message === "") {
+                return;
+            }
+
+            // Remove welcome screen
+            if (welcome) {
+                welcome.remove();
+            }
+
+            // Add user message
+            addMessage(
+                message,
+                "user"
+            );
+
+            // Add chat to history
+            addHistory(message);
+
+            // Clear input
+            input.value = "";
+
+            input.style.height = "auto";
+
+            // Temporary AI response
+            setTimeout(() => {
+
+                addMessage(
+                    "Hello! I'm MyAI 🤖\n\nYour AI backend isn't connected yet. Next we'll connect this interface to an AI model so I can actually answer your questions.",
+                    "ai"
+                );
+
+            }, 700);
+        }
+
+
+        /* ================= ADD MESSAGE ================= */
+
+        function addMessage(text, type) {
+
+            const messageDiv =
+                document.createElement("div");
+
+            messageDiv.className =
+                "message";
+
+
+            const avatar =
+                document.createElement("div");
+
+            avatar.className =
+                "avatar " +
+                (type === "user"
+                    ? "user-avatar"
+                    : "ai-avatar");
+
+
+            avatar.textContent =
+                type === "user"
+                    ? "U"
+                    : "AI";
+
+
+            const content =
+                document.createElement("div");
+
+            content.className =
+                "message-content";
+
+            content.textContent = text;
+
+
+            messageDiv.appendChild(avatar);
+
+            messageDiv.appendChild(content);
+
+            chatContainer.appendChild(messageDiv);
+
+
+            // Scroll to bottom
+
+            chatContainer.scrollTop =
+                chatContainer.scrollHeight;
+        }
+
+
+        /* ================= ENTER KEY ================= */
+
+        function handleKey(event) {
+
+            if (
+                event.key === "Enter" &&
+                !event.shiftKey
+            ) {
+
+                event.preventDefault();
+
+                sendMessage();
+            }
+        }
+
+
+        /* ================= AUTO RESIZE ================= */
+
+        function autoResize(element) {
+
+            element.style.height = "auto";
+
+            element.style.height =
+                Math.min(
+                    element.scrollHeight,
+                    150
+                ) + "px";
+        }
+
+
+        /* ================= NEW CHAT ================= */
+
+        function newChat() {
+
+            chatContainer.innerHTML = `
+                <div class="welcome" id="welcome">
+
+                    <h1>
+                        How can I help you?
+                    </h1>
+
+                    <p>
+                        Ask me anything and let's build something awesome.
+                    </p>
+
+                </div>
+            `;
+
+            input.value = "";
+
+            input.style.height = "auto";
+        }
+
+
+        /* ================= CHAT HISTORY ================= */
+
+        function addHistory(message) {
+
+            const item =
+                document.createElement("div");
+
+            item.className =
+                "chat-item";
+
+            item.textContent =
+                message;
+
+            historyList.prepend(item);
+        }
+
+
+        /* ================= MOBILE SIDEBAR ================= */
+
+        function toggleSidebar() {
+
+            const sidebar =
+                document.getElementById("sidebar");
+
+            sidebar.classList.toggle("active");
+        }
+
+
+        /* ================= INPUT FOCUS ================= */
+
+        input.focus();
+
+    </script>
+
+</body>
+</html>
